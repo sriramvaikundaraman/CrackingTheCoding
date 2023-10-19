@@ -1,0 +1,551 @@
+Cracking The Coding - Arrays and Strings
+-----------------------------------------
+
+1.1 Implement an algorithm to determine if a string has all unique characters. What if you
+cannot use additional data structures.
+
+Solution
+---------
+We first check if the length of the input string is greater than 128. This is an arbitrary threshold, but it's often used to optimize for ASCII characters. If the string is longer than this, there must be duplicates, so we return False.
+
+We use two nested loops to compare each character with every other character in the string. If we find a pair of equal characters, we return False because that indicates the presence of duplicates.
+
+If we reach the end of the loops without finding any duplicates, we return True, indicating that all characters in the string are unique.
+
+Sample java pgm
+
+ public static boolean hasUniqueCharacters(String str) {
+        if (str.length() > 128) {
+            return false; // If the string has more than 128 characters, there must be duplicates.
+        }
+
+        for (int i = 0; i < str.length(); i++) {
+            for (int j = i + 1; j < str.length(); j++) {
+                if (str.charAt(i) == str.charAt(j)) {
+                    return false; // If we find a duplicate character, return false.
+                }
+            }
+        }
+
+        return true;
+   }
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.2 Given two strings, write a method to decide if one is a permutation of the other in java 
+
+
+To determine if one string is a permutation of another in Java, you can follow these steps:
+
+Check if the lengths of the two strings are different. If they are, one cannot be a permutation of the other.
+
+Convert the two strings to character arrays.
+
+Sort the character arrays.
+
+Compare the sorted character arrays to check if they are equal. If they are equal, it means one string is a permutation of the other.
+
+Here's a Java method to do this:
+
+public static boolean arePermutations(String str1, String str2) {
+        // Check if the lengths are different.
+        if (str1.length() != str2.length()) {
+            return false;
+        }
+
+        // Convert the strings to character arrays.
+        char[] charArray1 = str1.toCharArray();
+        char[] charArray2 = str2.toCharArray();
+
+        // Sort the character arrays.
+        Arrays.sort(charArray1);
+        Arrays.sort(charArray2);
+
+        // Compare the sorted character arrays.
+        return Arrays.equals(charArray1, charArray2);
+    }
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+1.3 URLify: Write a method to replace all spaces in a string with '%20'. You may assume that the string has sufficient space at the end to hold the additional characters, and that you are given the "true" length of the string. (Note: If implementing in Java, please use a character array so that you can perform this operation in place.) 
+
+To perform URL encoding (replace spaces with '%20') in a character array in Java, you can follow these steps:
+
+Calculate the final length of the string after replacing spaces with '%20'. This length will be trueLength + 2 * spaceCount, where trueLength is the length of the original string, and spaceCount is the number of spaces in the original string.
+
+Start from the end of the character array (which has extra space for the '%20' replacements) and the original string (trueLength).
+
+Copy characters from the original string to the end of the character array, replacing spaces with '%20' when necessary.
+
+Here's a Java method to perform this operation in-place:
+
+   public static void replaceSpaces(char[] str, int trueLength) {
+        int spaceCount = 0;
+        for (int i = 0; i < trueLength; i++) {
+            if (str[i] == ' ') {
+                spaceCount++;
+            }
+        }
+
+        int index = trueLength + 2 * spaceCount;
+        if (trueLength < str.length) {
+            str[trueLength] = '\0'; // Null-terminate the character array.
+        }
+
+        for (int i = trueLength - 1; i >= 0; i--) {
+            if (str[i] == ' ') {
+                str[index - 1] = '0';
+                str[index - 2] = '2';
+                str[index - 3] = '%';
+                index -= 3;
+            } else {
+                str[index - 1] = str[i];
+                index--;
+            }
+        }
+    }
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+1.4 Palindrome Permutation: Given a string, write a function to check if it is a permutation of a palindrome.
+
+Create a frequency map of characters in the string, counting how many times each character appears.
+
+Count how many characters have an odd frequency. In a palindrome, you can have at most one character with an odd frequency (for strings with an even length) or exactly one character with an odd frequency (for strings with an odd length).
+
+If the count of characters with an odd frequency is more than 1, the string cannot be a permutation of a palindrome.
+
+Here's the Java code to implement this logic:
+
+    public static boolean isPermutationOfPalindrome(String str) {
+        // Remove spaces and convert the string to lowercase to make it case-insensitive.
+        str = str.replaceAll(" ", "").toLowerCase();
+
+        Map<Character, Integer> charFrequency = new HashMap<>();
+
+        // Count the frequency of each character.
+        for (char c : str.toCharArray()) {
+            charFrequency.put(c, charFrequency.getOrDefault(c, 0) + 1);
+        }
+
+        int oddCount = 0;
+        for (int frequency : charFrequency.values()) {
+            if (frequency % 2 != 0) {
+                oddCount++;
+            }
+        }
+
+        // Check if it's a permutation of a palindrome.
+        return oddCount <= 1;
+    }
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+1.5 One Away: There are three types of edits that can be performed on strings: insert a character, remove a character, or replace a character. Given two strings, write a function to check if they are one edit (or zero edits) away
+
+Calculate the absolute difference in lengths between the two strings. If the difference is more than 1, they can't be one edit away.
+
+If the lengths are the same, check for a single character replacement by comparing characters at each position.
+
+If the lengths differ by one, check for a single character insertion or removal. You can do this by iterating through both strings and comparing characters while allowing for one mismatch.
+
+Here's a Java function to implement this logic:
+
+
+public class OneAwayChecker {
+    public static boolean isOneAway(String str1, String str2) {
+        int len1 = str1.length();
+        int len2 = str2.length();
+
+        if (Math.abs(len1 - len2) > 1) {
+            return false; // More than one edit away.
+        }
+
+        if (len1 == len2) {
+            return isOneReplacementAway(str1, str2);
+        } else if (len1 + 1 == len2) {
+            return isOneInsertionAway(str1, str2);
+        } else if (len1 - 1 == len2) {
+            return isOneInsertionAway(str2, str1);
+        }
+
+        return false; // More than one edit away.
+    }
+
+    private static boolean isOneReplacementAway(String str1, String str2) {
+        boolean foundDifference = false;
+        for (int i = 0; i < str1.length(); i++) {
+            if (str1.charAt(i) != str2.charAt(i)) {
+                if (foundDifference) {
+                    return false; // Already found one difference, can't have more.
+                }
+                foundDifference = true;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isOneInsertionAway(String str1, String str2) {
+        int i = 0;
+        int j = 0;
+        while (i < str1.length() && j < str2.length()) {
+            if (str1.charAt(i) != str2.charAt(j)) {
+                if (i != j) {
+                    return false; // More than one mismatch.
+                }
+                j++;
+            } else {
+                i++;
+                j++;
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        String str1 = "pale";
+        String str2 = "ple";
+
+        if (isOneAway(str1, str2)) {
+            System.out.println("'" + str1 + "' and '" + str2 + "' are one edit (or zero edits) away.");
+        } else {
+            System.out.println("'" + str1 + "' and '" + str2 + "' are not one edit away.");
+        }
+    }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.6 String Compression: Implement a method to perform basic string compression using the counts of repeated characters. For example, the string aabcccccaaa would become a2blc5a3. If the "compressed" string would not become smaller than the original string, your method should return the original string. You can assume the string has only uppercase and lowercase letters (a - z).
+
+
+To implement basic string compression in Java, you can follow these steps:
+
+1. Initialize an empty string to hold the compressed result.
+2. Iterate through the input string, keeping track of the current character and the count of its repetitions.
+3. Append the current character and its count to the compressed result string as soon as the character changes.
+4. Check if the length of the compressed string is smaller than the original string. If not, return the original string.
+5. Otherwise, return the compressed string.
+Here's a Java method that performs string compression:
+
+public class StringCompression {
+    public static String compressString(String str) {
+        if (str == null || str.isEmpty()) {
+            return str; // Handle null or empty strings.
+        }
+
+        StringBuilder compressed = new StringBuilder();
+        char currentChar = str.charAt(0);
+        int count = 1;
+
+        for (int i = 1; i < str.length(); i++) {
+            if (str.charAt(i) == currentChar) {
+                count++;
+            } else {
+                compressed.append(currentChar);
+                compressed.append(count);
+                currentChar = str.charAt(i);
+                count = 1;
+            }
+        }
+
+        // Append the last character and its count.
+        compressed.append(currentChar);
+        compressed.append(count);
+
+        // Check if the compressed string is shorter than the original string.
+        if (compressed.length() < str.length()) {
+            return compressed.toString();
+        } else {
+            return str;
+        }
+    }
+
+    public static void main(String[] args) {
+        String input = "aabcccccaaa";
+        String compressed = compressString(input);
+        System.out.println("Original: " + input);
+        System.out.println("Compressed: " + compressed);
+    }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.7 Given an image represented by an NxN matrix, where each pixel in the image is 4
+bytes, write a method to rotate the image by 90 degrees. Can you do this in place?
+
+public class RotateImage {
+    public static void rotateImage(int[][] matrix) {
+        int n = matrix.length;
+
+        for (int layer = 0; layer < n / 2; layer++) {
+            int first = layer;
+            int last = n - 1 - layer;
+
+            for (int i = first; i < last; i++) {
+                int offset = i - first;
+
+                // Save the top element
+                int top = matrix[first][i];
+
+                // Move left to top
+                matrix[first][i] = matrix[last - offset][first];
+
+                // Move bottom to left
+                matrix[last - offset][first] = matrix[last][last - offset];
+
+                // Move right to bottom
+                matrix[last][last - offset] = matrix[i][last];
+
+                // Move top to right
+                matrix[i][last] = top;
+            }
+        }
+    }
+
+    public static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int cell : row) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] matrix = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+
+        System.out.println("Original Matrix:");
+        printMatrix(matrix);
+
+        rotateImage(matrix);
+
+        System.out.println("Rotated Matrix:");
+        printMatrix(matrix);
+    }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.8  Write an algorithm such that if an element in an MxN matrix is 0, its entire row and column are set to 0
+
+To set an entire row and column to 0 when an element in an MxN matrix is 0, you can follow these steps in Java:
+
+1. Create two boolean arrays to keep track of which rows and columns should be zeroed out.
+2. Traverse the matrix and mark the corresponding row and column in the boolean arrays if you encounter a 0.
+3. Traverse the matrix again and set the elements to 0 for the rows and columns marked in the boolean arrays.
+
+Here's a Java algorithm to accomplish this task:
+
+public class SetZeroes {
+    public static void setZeroes(int[][] matrix) {
+        int m = matrix.length;    // Number of rows
+        int n = matrix[0].length; // Number of columns
+
+        boolean[] zeroRows = new boolean[m];
+        boolean[] zeroCols = new boolean[n];
+
+        // Mark rows and columns containing 0.
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    zeroRows[i] = true;
+                    zeroCols[j] = true;
+                }
+            }
+        }
+
+        // Set rows to 0.
+        for (int i = 0; i < m; i++) {
+            if (zeroRows[i]) {
+                for (int j = 0; j < n; j++) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+
+        // Set columns to 0.
+        for (int j = 0; j < n; j++) {
+            if (zeroCols[j]) {
+                for (int i = 0; i < m; i++) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+    }
+
+    public static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int cell : row) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] matrix = {
+            {1, 2, 3},
+            {4, 0, 6},
+            {7, 8, 9}
+        };
+
+        System.out.println("Original Matrix:");
+        printMatrix(matrix);
+
+        setZeroes(matrix);
+
+        System.out.println("Matrix with Zeroes Set:");
+        printMatrix(matrix);
+    }
+}
+
+
+An alternate approach to the "set zeroes" problem involves modifying the original matrix in place, without using additional arrays to track which rows and columns need to be zeroed. This can be done with the following algorithm:
+
+1. First, scan the matrix to identify the rows and columns that need to be zeroed out. However, instead of using separate boolean arrays, we can use the first row and first column of the matrix to store this information.
+
+2. Start by scanning the first row and first column to see if they should be zeroed. Use two boolean variables, `zeroFirstRow` and `zeroFirstCol`, to keep track of whether the first row and first column should be zeroed.
+
+3. Next, traverse the rest of the matrix (excluding the first row and first column). If you find a zero at matrix[i][j], set the elements in the first row (matrix[0][j]) and the first column (matrix[i][0]) to zero to mark that the respective row and column should be zeroed later.
+
+4. After marking the rows and columns, start from the bottom-right of the matrix and work your way up. For each element, if either the first row or the first column indicates it should be zeroed, set the element to zero.
+
+5. Finally, check if `zeroFirstRow` and `zeroFirstCol` are true, and if so, zero out the entire first row and first column.
+
+Here's the Java code for this approach:
+
+```java
+public class SetZeroesAlternate {
+    public static void setZeroes(int[][] matrix) {
+        int m = matrix.length;    // Number of rows
+        int n = matrix[0].length; // Number of columns
+
+        boolean zeroFirstRow = false;
+        boolean zeroFirstCol = false;
+
+        // Check if the first row and first column need to be zeroed.
+        for (int i = 0; i < m; i++) {
+            if (matrix[i][0] == 0) {
+                zeroFirstCol = true;
+                break;
+            }
+        }
+
+        for (int j = 0; j < n; j++) {
+            if (matrix[0][j] == 0) {
+                zeroFirstRow = true;
+                break;
+            }
+        }
+
+        // Check the rest of the matrix to mark rows and columns.
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        // Zero out rows and columns based on the first row and first column.
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+
+        // Zero out the first row and first column if needed.
+        if (zeroFirstRow) {
+            for (int j = 0; j < n; j++) {
+                matrix[0][j] = 0;
+            }
+        }
+
+        if (zeroFirstCol) {
+            for (int i = 0; i < m; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+    }
+
+    public static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int cell : row) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] matrix = {
+            {1, 2, 3},
+            {4, 0, 6},
+            {7, 8, 9}
+        };
+
+        System.out.println("Original Matrix:");
+        printMatrix(matrix);
+
+        setZeroes(matrix);
+
+        System.out.println("Matrix with Zeroes Set:");
+        printMatrix(matrix);
+    }
+}
+```
+
+This alternative approach reduces the space complexity because it doesn't require additional boolean arrays. It uses the first row and first column of the matrix to store information about which rows and columns should be zeroed out, and it proceeds to zero them out in the final step.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.9 String Rotation:Assumeyou have a method isSubstring which checks if one word is a substring of another. Given two strings, sl and s2, write code to check if s2 is a rotation of sl using only one call to isSubstring (e.g., "waterbottle" is a rotation of"erbottlewat").
+
+Concatenate the first string with itself. This effectively doubles the original string (e.g., "waterbottle" becomes "waterbottlewaterbottle").
+
+Use the isSubstring method to check if the second string is a substring of the concatenated string.
+
+If the second string is a rotation of the first, it will be a substring of the concatenated string, as rotations are essentially just shifts of the original string.
+
+Here's a Java code snippet for this approach:
+
+public class StringRotationAlternate {
+    public static boolean isRotation(String s1, String s2) {
+        if (s1.length() == s2.length() && s1.length() > 0) {
+            String s1s1 = s1 + s1;
+            return s1s1.contains(s2);
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        String s1 = "waterbottle";
+        String s2 = "erbottlewat";
+
+        if (isRotation(s1, s2)) {
+            System.out.println("'" + s2 + "' is a rotation of '" + s1 + "'.");
+        } else {
+            System.out.println("'" + s2 + "' is not a rotation of '" + s1 + "'.");
+        }
+    }
+}
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
